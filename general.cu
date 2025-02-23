@@ -20,10 +20,9 @@
  * \return r Valeur a puissance b
  */
 __host__ __device__ int localPow(int a, int b) {
-  int i ;
-  int r=1 ;
-  for(i=0 ; i<b ; i++)
-    r*=a ;
-  return r ;
+  int r=1;
+  for(int i=0 ; i<b ; i++)
+    r*=a;
+  return r;
 } /* int localPow(int a, int b) */
 

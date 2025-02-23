@@ -19,7 +19,7 @@
  * \param argv Arguments du programme
  * \return 0 - Arrêt normal du programme.
  */
-int main(int argc, char * argv[])
+int main(int, char * argv[])
 {
 
 	int world_size, rank;

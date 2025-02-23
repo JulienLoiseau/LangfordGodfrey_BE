@@ -17,9 +17,8 @@
  * Dans notre cas l'on fixe les valeurs des bits 1 et 2 à 1 (Voir preuve)
  */
 void initLocale(memlocale *ml) {
-	int i;
 	/* on fixe x1 = x2 = 1 */
-	for (i=1 ; i<=2 ; i++)
+	for (int i=1 ; i<=2 ; i++)
 		ml->evaluation[i] = 1 ;
 	LONG_cree( &(ml->sommeProc) ) ;
 	LONG_cree( &(ml->sommeTache) ) ;
@@ -33,13 +32,12 @@ void initLocale(memlocale *ml) {
  * \param ml mémoire locale au thread
  */
 void initTermes(memlocale *ml) {
-	int i, j ;
-	boolean onDoitMultiplier ;
+	bool onDoitMultiplier ;
 
 	/* 1: les premiers termes : ce sont les sommes de produits deux à deux */
 	/* 1a : i=1 : x1.x3 + ... + x(n-1).x(n+1) (on s'arrête en cours de route) */
 	ml->termes[1] = 0 ;
-	for ( j=1 ; j <= NBCOUL - 1 ; j++ )
+	for (int j=1 ; j <= NBCOUL - 1 ; j++ )
 		ml->termes[1] += ml->evaluation[j] * ml->evaluation[j+2] ;
 	if ( NBCOUL % 2 ) { /* S1 paire */
 		ml->termes[1] /= 2 ;
@@ -48,9 +46,9 @@ void initTermes(memlocale *ml) {
 	else onDoitMultiplier = true ;
 
 	/* 1b : pour i>1 : x1.x(1+i+1) + x2.x(2+i+1) + ... + x(2n-i-1)x(2n) */
-	for (i=2 ; i <= NBCOUL ; i++) {
+	for (int i=2 ; i <= NBCOUL ; i++) {
 		ml->termes[i] = 0 ;
-		for ( j=1 ; j <= NBCUBE - i - 1 ; j++ )
+		for (int j=1 ; j <= NBCUBE - i - 1 ; j++ )
 			ml->termes[i] += ml->evaluation[j] * ml->evaluation[j+i+1] ;
 		if ( i%2 ) { /* Si paire */
 			ml->termes[i] /= 2 ;
@@ -61,7 +59,7 @@ void initTermes(memlocale *ml) {
 
 	/* 2: le signe ici (je compte les negatifs, puis je donne le signe) */
 	ml->signe = 0 ;
-	for (i=3 ; i < 3 + TAILLETACHE ; i++)
+	for (int i=3 ; i < 3 + TAILLETACHE ; i++)
 		if (ml->evaluation[i] < 0)
 			ml->signe ++ ;
 	ml->signe = (ml->signe % 2 == 0) ? 1 : -1 ;
@@ -69,7 +67,7 @@ void initTermes(memlocale *ml) {
 	/* 3: init. de sommeTache est au premier produit (avec le signe) */
 	if (onDoitMultiplier) {
 		LONG_init_unite( &(ml->sommeTache) , ml->signe) ;
-		for (i=1 ; i <= NBCOUL ; i++)
+		for (int i=1 ; i <= NBCOUL ; i++)
 			LONG_multiplie_char( &(ml->sommeTache) , ml->termes[i]) ;
 	}
 	else
@@ -86,20 +84,17 @@ void initTermes(memlocale *ml) {
  *
  * On regarde par rapport à la tâche convertie en binaire quels sont les valeurs des bits dans les positions (evaluation)
  */
-void initTache(long long numero, memlocale *ml , char * GrayTab) {
-	long long i ;
-	long long v ;
-
+void initTache(long long numero, memlocale *ml , [[maybe_unused]] char * GrayTab) {
 	/* on calcule la tâche, de 3 à 2+NBTACHE */
-	v = numero ;
-	for ( i=3 ; i < 3 + TAILLETACHE ; i++ ) {
+	long long v = numero ;
+	for (int i=3 ; i < 3 + TAILLETACHE ; i++ ) {
 		ml->evaluation[i] = (v%2 == 1) ? -1 : 1 ;
 		v /= 2 ;
 	}
 	/* fin de l'enumeration */
 
 	/* on fixe toutes les valeurs selon Gray à 1 (avant de commencer) */
-	for ( i = 3 + TAILLETACHE ; i <= NBCUBE ; i++ )
+	for (int i = 3 + TAILLETACHE ; i <= NBCUBE ; i++ )
 		ml->evaluation[i] = 1 ;
 
 	/* les termes au debut, et sommeTache init. au produit des termes initiaux */
@@ -118,7 +113,7 @@ void initTache(long long numero, memlocale *ml , char * GrayTab) {
  */
 void modifierCase(int numCase, memlocale *ml) {
 	int i ;
-	boolean onDoitMultiplier = true ;
+	bool onDoitMultiplier = true ;
 
 	int max1, max2 = NBCOUL ;
 
@@ -234,29 +229,24 @@ if (numCase <= NBCOUL) {
  */
 void accumulerTache(memlocale *ml, char * GrayTab) {
 	int numCase ;
-	int j,	/* indice dans le tableau mg->Gray */
-	       	 t ; /* les "tours" (voir grand commentaire ci-dessous) */
-	long gg ; /* pour le nombre de tours */
 
-	int g, k ;
-
-	g = NBCUBE - 2 - TAILLETACHE - ENCOMBREMENT ; /* le G-E */
+	int g = NBCUBE - 2 - TAILLETACHE - ENCOMBREMENT ; /* le G-E */
 	if (g < 0) g = 0 ;	/* mais en faisant attention */
 
-	gg = localPow(2,g) ; /* le 2^(G-E) qui fait attention */
+	long gg = localPow(2,g) ; /* le 2^(G-E) qui fait attention */
 
 	/* traiter les cases normales (dont le n° selon Gray est dans le tableau) */
-	for ( j = 0 ; j < TAILLEGRAY ; j++ ) {
+	for (unsigned long long j = 0 ; j < TAILLEGRAY ; j++ ) {
 		numCase = DECALAGEGRAY + GrayTab[j] ;
 		modifierCase(numCase, ml) ;
 	}
 
-	for (t=1 ; t<gg ; t++) { /*tours suivants */
+	for (int t=1 ; t<gg ; t++) { /*tours suivants */
 
 		/* traiter la dernière du tour precedent */
 		/*	 (dont on doit CALCULER à la main le numCase à modifier) */
-		k = ENCOMBREMENT ;
-		j = t ;
+		int k = ENCOMBREMENT ;
+		int j = t ;
 		while ( j % (TAILLEGRAY + 1) == 0 ) { /* TAILLEGRAY = 2^ENCOMBREMENT */
 			k += ENCOMBREMENT ;
 			j /= (TAILLEGRAY + 1) ;
@@ -265,7 +255,7 @@ void accumulerTache(memlocale *ml, char * GrayTab) {
 		modifierCase(numCase, ml) ;
 
 		/* traiter les suivantes du tour : qui sont dans Gray (modulo ...) */
-		for ( j = 0 ; j < TAILLEGRAY ; j++ ) {
+		for (unsigned long long j = 0 ; j < TAILLEGRAY ; j++ ) {
 			numCase = DECALAGEGRAY + GrayTab[j] ;
 			modifierCase(numCase,ml) ;
 		}

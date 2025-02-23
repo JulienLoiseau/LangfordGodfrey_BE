@@ -30,10 +30,9 @@ char h_Gray[TAILLEGRAY];
 void consGray() {
 	char valeur ;
 	int debut, pas ;
-	int i ;
 
 	for ( valeur=0, debut=0, pas=2;	valeur < NBGRAY	; valeur++, debut=2*debut+1, pas*=2 )
-		for ( i=debut ; i<TAILLEGRAY ; i+=pas )
+		for (unsigned long long i=debut ; i<TAILLEGRAY ; i+=pas )
 			h_Gray[i] = valeur ;
 }
 
@@ -45,9 +44,8 @@ void consGray() {
  * Dans notre cas l'on fixe les valeurs des bits 1 et 2 à 1 (Voir preuve)
  */
 __device__ void d_initLocale(memlocale_gpu *ml) {
-	int i;
 	/* on fixe x1 = x2 = 1 */
-	for (i=1 ; i<=2 ; i++)
+	for (int i=1 ; i<=2 ; i++)
 		ml->evaluation[i] = 1 ;
 	LONG_cree( &(ml->sommeTache) ) ;
 	LONG_cree( &(ml->produit) ) ;
@@ -61,7 +59,7 @@ __device__ void d_initLocale(memlocale_gpu *ml) {
  */
 __device__ void d_initTermes(memlocale_gpu *ml) {
 	int i, j ;
-	boolean onDoitMultiplier ;
+	bool onDoitMultiplier ;
 
 	/* 1: les premiers termes : ce sont les sommes de produits deux à deux */
 	/* 1a : i=1 : x1.x3 + ... + x(n-1).x(n+1) (on s'arrête en cours de route) */
@@ -145,7 +143,7 @@ __device__ void d_initTache(long long numero, memlocale_gpu *ml , char * GrayTab
  */
 __device__ void d_modifierCase(int numCase, memlocale_gpu *ml) {
 	int i ;
-	boolean onDoitMultiplier = true ;
+	bool onDoitMultiplier = true ;
 
 	int max1, max2 = NBCOUL ;
 
